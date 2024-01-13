@@ -1,17 +1,17 @@
 class Recipe {
   final String name;
-  final int caloryCount;
-  final int type;
-  final String imageUrl;
+  final String images;
+  final double rating;
+  final String totalTime;
 
-  Recipe({required this.name, required this.caloryCount, required this.type, required this.imageUrl});
+  Recipe({required this.name, required this.images, required this.rating, required this.totalTime});
 
   factory Recipe.fromJson(dynamic json) {
     return Recipe(
         name: json['name'] as String,
-        caloryCount: json['caloryCount'] as int,
-        type: json['type'] as int,
-        imageUrl: json['imageUrl'] as String);
+        images: json['images'][0]['hostedLargeUrl'] as String,
+        rating: json['rating'] as double,
+        totalTime: json['totalTime'] as String);
   }
 
   static List<Recipe> recipesFromSnapshot(List snapshot) {
@@ -22,6 +22,6 @@ class Recipe {
 
   @override
   String toString(){
-    return 'Recipe {name: $name, image: $caloryCount, rating: $type, totalTime: $imageUrl}';
+    return 'Recipe {name: $name, image: $images, rating: $rating, totalTime: $totalTime}';
   }
 }
