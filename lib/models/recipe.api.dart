@@ -3,20 +3,23 @@ import 'package:food_flutter/models/recipe.dart';
 import 'package:http/http.dart' as http;
 
 class RecipeApi {
-  static Future<List<Recipe>> getRecipes() async {
-    final response = await http.get(
-      Uri.parse('https://localhost:7026/api/v1/Recipe'),
-      headers: {
-        "accept": "application/json",
-      },
-    );
+  static Future<List<Recipe>> getRecipe() async {
+    var uri = Uri.https('yummly2.p.rapidapi.com', '/feeds/list',
+        {"limit": "18", "start": "0", "tag": "list.recipe.popular"});
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      List<Recipe> recipes = data.map((json) => Recipe.fromJson(json)).toList();
-      return recipes;
-    } else {
-      throw Exception('Failed to load recipes');
+    final response = await http.get(uri, headers: {
+      "x-rapidapi-key": "1ed4129e90mshd0dbafa1653760ap18381djsn8f9b65ea06f3",
+      "x-rapidapi-host": "yummly2.p.rapidapi.com",
+      "useQueryString": "true"
+    });
+
+    Map data = jsonDecode(response.body);
+    List _temp = [];
+
+    for (var i in data['feed']) {
+      _temp.add(i['content']['details']);
     }
+
+    return Recipe.recipesFromSnapshot(_temp);
   }
 }
