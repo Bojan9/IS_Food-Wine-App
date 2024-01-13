@@ -1,7 +1,9 @@
+// home.dart
 import 'package:flutter/material.dart';
 import 'package:food_flutter/models/recipe.api.dart';
 import 'package:food_flutter/models/recipe.dart';
 import 'package:food_flutter/views/widgets/recipe_card.dart';
+import 'package:food_flutter/views/recipe_details.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -9,24 +11,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Recipe> recipes = [];
+  late List<Recipe> _recipes;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadRecipes();
+    getRecipes();
   }
 
-  Future<void> _loadRecipes() async {
-    try {
-      List<Recipe> fetchedRecipes = await RecipeApi.getRecipes();
-      setState(() {
-        recipes = fetchedRecipes;
-      });
-    } catch (e) {
-      // Handle error
-      print('Error loading recipes: $e');
-    }
+  Future<void> getRecipes() async {
+    _recipes = await RecipeApi.getRecipe();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _navigateToRecipeDetails(Recipe recipe) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RecipeDetailsPage(recipe: recipe)),
+    );
   }
 
   @override
@@ -38,21 +43,26 @@ class _HomePageState extends State<HomePage> {
           children: [
             Icon(Icons.restaurant_menu),
             SizedBox(width: 10),
-            Text('Food Recipes'),
+            Text('Food Recipe'),
           ],
         ),
       ),
-      body: ListView.builder(
-        itemCount: recipes.length,
-        itemBuilder: (context, index) {
-          return RecipeCard(
-            name: recipes[index].name,
-            caloryCount: recipes[index].caloryCount.toString(),
-            type: recipes[index].type.toString(),
-            imageUrl: recipes[index].imageUrl,
-          );
-        },
-      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: _recipes.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => _navigateToRecipeDetails(_recipes[index]),
+                  child: RecipeCard(
+                    title: _recipes[index].name,
+                    cookTime: _recipes[index].totalTime,
+                    rating: _recipes[index].rating.toString(),
+                    thumbnailUrl: _recipes[index].images,
+                  ),
+                );
+              },
+            ),
     );
   }
 }
